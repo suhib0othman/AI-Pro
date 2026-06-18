@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 10. Request Auth Priority global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 2. Validation blueprint for savedHustles
+    function isValidSavedHustle(data) {
+      return data.keys().hasAll(['userId', 'hustleId', 'createdAt']) 
+             && data.keys().size() == 3
+             && data.userId is string
+             && data.userId == request.auth.uid
+             && data.hustleId is string
+             && data.hustleId.size() <= 128
+             && data.createdAt == request.time;
+    }
+
+    // 3. Validation blueprint for plans
+    function isValidPlan(data) {
+      return data.keys().hasAll(['answers', 'createdAt'])
+             && data.keys().size() == 2
+             && data.answers is map
+             && data.createdAt == request.time;
+    }
+
+    // Match rules for savedHustles collection
+    match /savedHustles/{savedHustleId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+                    && isValidId(savedHustleId) 
+                    && isValidSavedHustle(incoming());
+      
+      // Since saving a favorite is binary (either saved or deleted), update is disabled.
+      allow update: if false;
+      
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Match rules for plans collection
+    match /plans/{planId} {
+      allow get: if true;
+      allow create: if isValidId(planId) && isValidPlan(incoming());
+      allow list, update, delete: if false;
+    }
+  }
+}

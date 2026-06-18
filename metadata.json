@@ -1,0 +1,6 @@
+{
+  "name": "AI Assist Pro",
+  "description": "اكتشف العمل الجانبي المثالي المعتمد على الذكاء الاصطناعي لك بناءً على مهاراتك ووقتك واهتماماتك.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "savedHustles": {
+      "title": "Saved Side Hustles",
+      "description": "A side hustle saved by a user to their account dashboard",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The unique identifier of the user who saved the hustle"
+        },
+        "hustleId": {
+          "type": "string",
+          "description": "The unique ID of the saved side hustle idea"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the hustle was saved"
+        }
+      },
+      "required": ["userId", "hustleId", "createdAt"]
+    },
+    "plans": {
+      "title": "Shared Plans",
+      "description": "A shared dynamic action plan saved for deep linking and social sharing",
+      "type": "object",
+      "properties": {
+        "answers": {
+          "type": "object",
+          "description": "The answers and options selected by the user in the survey"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this plan was created"
+        }
+      },
+      "required": ["answers", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/savedHustles/{savedHustleId}": {
+      "schema": "savedHustles",
+      "description": "Collection of saved side hustles mapped per user"
+    },
+    "/plans/{planId}": {
+      "schema": "plans",
+      "description": "Collection of plan sharing deep links"
+    }
+  }
+}
